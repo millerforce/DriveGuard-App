@@ -1,5 +1,7 @@
 package com.example.driveguard.activities;
 
+import static android.view.View.VISIBLE;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.driveguard.ButtonDeck;
 import com.example.driveguard.GsonUtilities;
@@ -88,19 +91,14 @@ public class ProfileScreen extends AppCompatActivity {
 
             usernameText.setText(driver.getUsername());
             loginButton.setVisibility(View.GONE);
-            logoutButton.setVisibility(View.VISIBLE);
             signupButton.setVisibility(View.GONE);
-            changeUsernameButton.setVisibility(View.VISIBLE);
-            changePasswordButton.setVisibility(View.VISIBLE);
+            populateProfileData();
             changeUsernameButton.setOnClickListener(v -> showChangeUsernameDialog());
             changePasswordButton.setOnClickListener(v -> showChangePasswordDialog());
             deleteButton.setOnClickListener(v -> showDeleteAccountDialog());
         } else {
             usernameText.setText("Guest");
             logoutButton.setVisibility(View.GONE);
-            changeUsernameButton.setVisibility(View.GONE);
-            changePasswordButton.setVisibility(View.GONE);
-            deleteButton.setVisibility(View.GONE);
         }
 
         loginButton.setOnClickListener(v -> navigateToLogin());
@@ -131,6 +129,25 @@ public class ProfileScreen extends AppCompatActivity {
             startActivity(intent);
         }
         return true;
+    }
+
+    private void populateProfileData() {
+        if (driver != null) {
+            ConstraintLayout profileData = findViewById(R.id.profile_data);
+            TextView firstName = findViewById(R.id.firstNameDisplay);
+            TextView lastName = findViewById(R.id.lastNameDisplay);
+            TextView driverId = findViewById(R.id.driverIdDisplay);
+            TextView score = findViewById(R.id.driverScoreDisplay);
+            TextView date = findViewById(R.id.accountCreatedDisplay);
+
+            firstName.setText(driver.getFirstName());
+            lastName.setText(driver.getLastName());
+            driverId.setText(String.valueOf(driver.getId()));
+            score.setText(String.valueOf(driver.getOverallScore()));
+            date.setText(Utilities.formatDate(driver.getAccountCreationDate()));
+
+            profileData.setVisibility(VISIBLE);
+        }
     }
 
     private void showChangeUsernameDialog() {
@@ -235,10 +252,10 @@ public class ProfileScreen extends AppCompatActivity {
             public void onClick(View v) {
                 yes.setVisibility(View.GONE);
                 no.setVisibility(View.GONE);
-                delete.setVisibility(View.VISIBLE);
+                delete.setVisibility(VISIBLE);
                 question.setVisibility(View.GONE);
-                confirm.setVisibility(View.VISIBLE);
-                passwordInput.setVisibility(View.VISIBLE);
+                confirm.setVisibility(VISIBLE);
+                passwordInput.setVisibility(VISIBLE);
             }
         });
 
@@ -301,9 +318,9 @@ public class ProfileScreen extends AppCompatActivity {
             Toast.makeText(this, "Logged out.", Toast.LENGTH_SHORT).show();
             recreate();
             usernameText.setText("Guest");
-            loginButton.setVisibility(View.VISIBLE);
+            loginButton.setVisibility(VISIBLE);
             logoutButton.setVisibility(View.GONE);
-            signupButton.setVisibility(View.VISIBLE);
+            signupButton.setVisibility(VISIBLE);
 
         } else {
 

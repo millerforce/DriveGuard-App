@@ -44,14 +44,15 @@
         android:id="@+id/imageView"
         android:layout_width="374dp"
         android:layout_height="403dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="21dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:layout_marginBottom="244dp"
         android:backgroundTint="@color/navy"
+        android:scaleType="fitCenter"
         android:src="@drawable/logo_drive_guard"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.545"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView

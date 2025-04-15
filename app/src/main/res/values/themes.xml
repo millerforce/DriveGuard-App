@@ -27,4 +27,9 @@
         <item name="android:windowMinWidthMajor">80%</item> <!-- Dynamic width -->
         <item name="android:windowMinWidthMinor">80%</item>
     </style>
+
+    <style name="profile_text">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/textColorSecondary</item>
+    </style>
 </resources>

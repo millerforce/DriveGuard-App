@@ -1,8 +1,10 @@
 package com.example.driveguard;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 
 import com.example.driveguard.objects.Credentials;
 
@@ -100,6 +103,11 @@ public class Utilities {
             return false;
         }
     }
+
+    public static boolean checkLocationPermission(@NonNull Activity activity) {
+        return ContextCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
     public static String formatTime(String time) {
         try {
             // Parse the input string to LocalDateTime
@@ -111,6 +119,20 @@ public class Utilities {
             return timeDate.format(formatter);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("Invalid time format: " + time, e);
+        }
+    }
+
+    public static String formatDate(String date) {
+        try {
+            // Parse the input string to LocalDateTime
+            LocalDateTime timeDate = LocalDateTime.parse(date);
+
+            // Formatter to exclude milliseconds
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy", Locale.CANADA);
+
+            return timeDate.format(formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid time format: " + date, e);
         }
     }
 }

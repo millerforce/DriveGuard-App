@@ -219,7 +219,7 @@ public class HomeScreen extends AppCompatActivity {
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is not in the Support Library.
-        CharSequence name = "DriveGuard Notificaion Channel";
+        CharSequence name = "DriveGuard Notification Channel";
         String description = "DriveGuards Notification Channel for sending notification related to trips";
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);

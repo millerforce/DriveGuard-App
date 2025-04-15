@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.2"
+agp = "8.9.1"
 expandabletextview = "0.1.4"
 gson = "2.11.0"
 junit = "4.13.2"

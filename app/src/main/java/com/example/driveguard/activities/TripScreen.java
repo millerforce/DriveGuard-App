@@ -70,6 +70,7 @@ public class TripScreen extends AppCompatActivity {
     private Date timeLastChecked15Sec = new Date();
     private Weather currentWeather;
     private int postedSpeedLimit;
+    private ToggleButton startButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +95,7 @@ public class TripScreen extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //toggle button that is used to stop and start trips
-        ToggleButton startButton = findViewById(R.id.startButton);
+        startButton = findViewById(R.id.startButton);
 
         ButtonDeck.SetUpButtons(this);
         ButtonDeck.TintButton(this);
@@ -103,12 +104,23 @@ public class TripScreen extends AppCompatActivity {
             startButton.setEnabled(false);
         }
         if (Utilities.checkConnection(this)) {
-            RequestWeather(dataCollector.getStartingLocation());
-            RequestRoad(dataCollector.getStartingLocation());
+            if (!Utilities.checkLocationPermission(this)) {
+                enterDisabledState();
+                return;
+            }
+            Location startingLocation = dataCollector.getStartingLocation();
+
+            if (startingLocation == null){
+                enterDisabledState();
+                return;
+            }
+            else {
+                RequestWeather(dataCollector.getStartingLocation());
+                RequestRoad(dataCollector.getStartingLocation());
+            }
         } else {
-            Toast.makeText(this, "Unable to Access Network Connection", Toast.LENGTH_SHORT).show();
-            Toast.makeText(this, "Trip Functionality Disabled", Toast.LENGTH_SHORT).show();
-            startButton.setEnabled(false);
+            enterDisabledState();
+            return;
         }
         // Create a handler and runnable for the async loop
         final Handler handler = new Handler();
@@ -262,6 +274,12 @@ public class TripScreen extends AppCompatActivity {
             startActivity(intent);
         }
         return true;
+    }
+
+    private void enterDisabledState() {
+        Toast.makeText(this, "Unable to Access Network Connection or Location", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Trip Functionality Disabled", Toast.LENGTH_SHORT).show();
+        startButton.setEnabled(false);
     }
 
     // Method to check for driving events
