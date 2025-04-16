@@ -9,13 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.Manifest;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -32,27 +29,27 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.driveguard.ButtonDeck;
 import com.example.driveguard.DataClassifier;
 import com.example.driveguard.NetworkManager;
 import com.example.driveguard.R;
 import com.example.driveguard.Utilities;
-import com.example.driveguard.objects.Credentials;
-import com.example.driveguard.objects.DrivingEventsAdapter;
 import com.example.driveguard.objects.Road;
 import com.example.driveguard.objects.Trip;
 
 import java.io.IOException;
 import java.util.Date;
 
-import lombok.SneakyThrows;
+import lombok.Getter;
+import lombok.Setter;
 import okhttp3.Response;
 import com.example.driveguard.DataCollector;
 import com.example.driveguard.objects.Weather;
 import com.google.gson.Gson;
 
+@Getter
+@Setter
 public class TripScreen extends AppCompatActivity {
 
     private DataCollector dataCollector;
@@ -61,15 +58,29 @@ public class TripScreen extends AppCompatActivity {
     private Trip currentTrip;
     private final int START_TRIP_SUCCESS = 201;
     private final int STOP_TRIP_SUCCESS = 200;
+    private static final int MILLISECONDS_IN_A_MINUTE = 1000;
+    private static final int SECONDS_IN_A_MINUTE = 60;
+    private static final int EVENT_INTERVAL_SECONDS = 15;
+    private static final int WEATHER_CHECK_INTERVAL_MINUTES = 30;
+    private static final String TURN_EVENT = "turn";
+    private static final String SPEEDING_EVENT = "speed";
+    private static final String BRAKE_EVENT = "brake";
+    private static final String ACCELERATION_EVENT = "accelerate";
     private TextView limitText;
     private TextView speedText;
     private float speed;
     private float limit;
+
     private Map<String, Boolean> eventHasBeenDetected = new HashMap<>();
+
     private Date timeLastChecked30Min = new Date();
+
     private Date timeLastChecked15Sec = new Date();
+
     private Weather currentWeather;
+
     private int postedSpeedLimit;
+
     private ToggleButton startButton;
 
     @Override
@@ -136,7 +147,7 @@ public class TripScreen extends AppCompatActivity {
         };
 
         startButton.setOnClickListener(new View.OnClickListener() {
-            @SneakyThrows
+            //@SneakyThrows
             @Override
             public void onClick(View v) {
                 ButtonDeck.ToggleButtons(TripScreen.this);
@@ -146,7 +157,7 @@ public class TripScreen extends AppCompatActivity {
                 //start trip here
                 if (startButton.isChecked()) {//for starting trip
                     // 201 means a trip was started successfully
-                    Response response = networkManager.StartTrip(dataCollector.getStartingLocation());
+                    Response response = networkManager.startTrip(dataCollector.getStartingLocation());
                     if (response != null && response.code() == START_TRIP_SUCCESS) {
 
                         Toast.makeText(TripScreen.this, "Trip Successfully started!", Toast.LENGTH_LONG).show();
@@ -172,11 +183,16 @@ public class TripScreen extends AppCompatActivity {
 
                             if (tripResponse.isSuccessful()) {
                                 assert tripResponse.body() != null;
-                                Trip current = JsonToTrip(tripResponse.body().string());
+                                Trip current = null;
+                                try {
+                                    current = JsonToTrip(tripResponse.body().string());
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
                                 Utilities.SaveTripID(getApplicationContext(), current.getId());
                             }
 
-                            Response endResponse = networkManager.EndTrip(dataCollector.getStartingLocation());
+                            Response endResponse = networkManager.endTrip(dataCollector.getStartingLocation());
 
                             if (endResponse.isSuccessful()) {
                                 Toast.makeText(TripScreen.this, "ERROR: cancelling previous trip", Toast.LENGTH_LONG).show();
@@ -189,7 +205,7 @@ public class TripScreen extends AppCompatActivity {
                         }
                     }
                 } else if (!startButton.isChecked()) { // For ending trip
-                    Response response = networkManager.EndTrip(dataCollector.getStartingLocation());
+                    Response response = networkManager.endTrip(dataCollector.getStartingLocation());
                     if (response != null && response.code() == STOP_TRIP_SUCCESS) {
 
                         Toast.makeText(TripScreen.this, "Trip successfully ended!", Toast.LENGTH_LONG).show();
@@ -201,7 +217,11 @@ public class TripScreen extends AppCompatActivity {
 
                         // Score screen ic called - Stephan
                         assert response.body() != null;
-                        currentTrip = JsonToTrip(response.body().string());
+                        try {
+                            currentTrip = JsonToTrip(response.body().string());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                         ScoreDialog scoreDialog = new ScoreDialog();
                         scoreDialog.setTrip(currentTrip);
                         scoreDialog.show(getSupportFragmentManager(), "ScoreScreen");
@@ -243,7 +263,7 @@ public class TripScreen extends AppCompatActivity {
                 manager.notify(1, builder.build());
             }
         networkManager = new NetworkManager(getApplicationContext());
-        Response response = networkManager.EndTrip(dataCollector.getStartingLocation());
+        Response response = networkManager.endTrip(dataCollector.getStartingLocation());
         if (response.isSuccessful()) {
             Toast.makeText(this, "Leaving Activity, Trip Ended", Toast.LENGTH_SHORT).show();
         }
@@ -302,17 +322,17 @@ public class TripScreen extends AppCompatActivity {
         String l = "Speed Limit: " + String.valueOf(getPostedSpeedLimit());
         limitText.setText(l);
 
-        if (this.getTimeLastChecked15Sec().getTime() + 15 * 1000 <= new Date().getTime()) {
-            this.getEventHasBeenDetected().put("speed", false);
-            this.getEventHasBeenDetected().put("accelerate", false);
-            this.getEventHasBeenDetected().put("brake", false);
-            this.getEventHasBeenDetected().put("turn", false);
+        if (this.getTimeLastChecked15Sec().getTime() + EVENT_INTERVAL_SECONDS * MILLISECONDS_IN_A_MINUTE <= new Date().getTime()) {
+            this.getEventHasBeenDetected().put(SPEEDING_EVENT, false);
+            this.getEventHasBeenDetected().put(ACCELERATION_EVENT, false);
+            this.getEventHasBeenDetected().put(BRAKE_EVENT, false);
+            this.getEventHasBeenDetected().put(TURN_EVENT, false);
             this.setTimeLastChecked15Sec(new Date());
         }
 
         // Use NetworkManager for additional data retrieval
         // NetworkManager networkManager = new NetworkManager(getApplicationContext());
-        if (this.getTimeLastChecked30Min().getTime() + 30 * 60 * 1000 <= new Date().getTime()) {
+        if (this.getTimeLastChecked30Min().getTime() + WEATHER_CHECK_INTERVAL_MINUTES * SECONDS_IN_A_MINUTE * MILLISECONDS_IN_A_MINUTE <= new Date().getTime()) {
             RequestWeather(location);
             RequestRoad(location);
             this.setTimeLastChecked30Min(new Date());
@@ -321,21 +341,21 @@ public class TripScreen extends AppCompatActivity {
         dataClassifier = new DataClassifier(this.getPostedSpeedLimit());
         // Classify the data for events
 
-        if (!this.getEventHasBeenDetected().containsKey("speed"))
+        if (!this.getEventHasBeenDetected().containsKey(SPEEDING_EVENT))
         {
-            this.getEventHasBeenDetected().put("speed", false);
+            this.getEventHasBeenDetected().put(SPEEDING_EVENT, false);
         }
-        if (!this.getEventHasBeenDetected().containsKey("accelerate"))
+        if (!this.getEventHasBeenDetected().containsKey(ACCELERATION_EVENT))
         {
-            this.getEventHasBeenDetected().put("accelerate", false);
+            this.getEventHasBeenDetected().put(ACCELERATION_EVENT, false);
         }
-        if (!this.getEventHasBeenDetected().containsKey("brake"))
+        if (!this.getEventHasBeenDetected().containsKey(BRAKE_EVENT))
         {
-            this.getEventHasBeenDetected().put("brake", false);
+            this.getEventHasBeenDetected().put(BRAKE_EVENT, false);
         }
-        if (!this.getEventHasBeenDetected().containsKey("turn"))
+        if (!this.getEventHasBeenDetected().containsKey(TURN_EVENT))
         {
-            this.getEventHasBeenDetected().put("turn", false);
+            this.getEventHasBeenDetected().put(TURN_EVENT, false);
         }
 
         // Classify the data for events
@@ -389,43 +409,6 @@ public class TripScreen extends AppCompatActivity {
     }
     this.setTimeLastChecked30Min(new Date());
 }
-    public Map<String, Boolean> getEventHasBeenDetected() {
-        return eventHasBeenDetected;
-    }
-    public void setEventHasBeenDetected(Map<String, Boolean> eventHasBeenDetected) {
-        this.eventHasBeenDetected = eventHasBeenDetected;
-    }
-    // Getter
-    public Date getTimeLastChecked30Min() {
-        return timeLastChecked30Min;
-    }
 
-    // Setter
-    public void setTimeLastChecked30Min(Date timeLastChecked30Min) {
-        this.timeLastChecked30Min = timeLastChecked30Min;
-    }
-    public Date getTimeLastChecked15Sec() {
-        return timeLastChecked15Sec;
-    }
-
-    public void setTimeLastChecked15Sec(Date timeLastChecked15Sec) {
-        this.timeLastChecked15Sec = timeLastChecked15Sec;
-    }
-
-    // Getter for currentWeather
-    public Weather getCurrentWeather() { return currentWeather;}
-    // Setter for currentWeather
-    public void setCurrentWeather(Weather currentWeather) {
-        this.currentWeather = currentWeather;
-    }
-
-    // Getter for postedSpeedLimit
-    public int getPostedSpeedLimit() {
-        return postedSpeedLimit;
-    }
-    // Setter for postedSpeedLimit
-    public void setPostedSpeedLimit(int postedSpeedLimit) {
-        this.postedSpeedLimit = postedSpeedLimit;
-    }
 }
 

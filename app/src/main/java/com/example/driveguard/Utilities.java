@@ -30,7 +30,7 @@ public class Utilities {
     }
     public static void SaveCredentials(@NonNull Context context, @NonNull Credentials credentials){
         SharedPreferences preferences = context.getSharedPreferences(context.getString(R.string.preferences_file), Context.MODE_PRIVATE);
-    SharedPreferences.Editor editor = preferences.edit();
+        SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("driverId", credentials.getDriverId());
         editor.putString("token", credentials.getToken());
         if (credentials.getTripId() != -1){

@@ -23,7 +23,7 @@ public class GsonUtilsTests {
         Activity activity = new Activity();
         NetworkManager networkManager = new NetworkManager(activity.getApplicationContext());
 
-        Response logInResponse = networkManager.Login(account);
+        Response logInResponse = networkManager.login(account);
 
         if (logInResponse.isSuccessful()) {
             System.out.println("Logged in");

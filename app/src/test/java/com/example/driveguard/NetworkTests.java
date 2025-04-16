@@ -29,7 +29,7 @@ public class NetworkTests {
         Activity activity = new Activity();
         NetworkManager networkManager = new NetworkManager(activity.getApplicationContext());
 
-        Response response = networkManager.SignUp(account);
+        Response response = networkManager.signUp(account);
 
         //Gson gson = new Gson();
         //ErrorReport errorReport = gson.fromJson(response.body().string(), ErrorReport.class);
@@ -48,7 +48,7 @@ public class NetworkTests {
         Activity activity = new Activity();
         NetworkManager networkManager = new NetworkManager(activity.getApplicationContext());
 
-        Response response = networkManager.Login(account);
+        Response response = networkManager.login(account);
 
         System.out.println(response.code());
         System.out.println(response.body().string());
@@ -62,12 +62,12 @@ public class NetworkTests {
         Activity activity = new Activity();
         NetworkManager networkManager = new NetworkManager(activity.getApplicationContext());
 
-        Response response = networkManager.Login(account);
+        Response response = networkManager.login(account);
 
         Credentials credentials = JsonToCredentials(response.body().string());
 
         if (response.isSuccessful()){
-            Response logoutResponse = networkManager.Logout();
+            Response logoutResponse = networkManager.logout();
 
             assertTrue(logoutResponse.isSuccessful());
         }
@@ -79,7 +79,7 @@ public class NetworkTests {
         Activity activity = new Activity();
         NetworkManager networkManager = new NetworkManager(activity.getApplicationContext());
 
-        Response response = networkManager.Login(account);
+        Response response = networkManager.login(account);
 
         DataCollector dataCollector = new DataCollector(activity.getApplicationContext());
 
@@ -87,7 +87,7 @@ public class NetworkTests {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             Credentials credentials = gson.fromJson(response.body().string(), Credentials.class);
 
-            Response response1 = networkManager.StartTrip(dataCollector.getStartingLocation());
+            Response response1 = networkManager.startTrip(dataCollector.getStartingLocation());
 
             System.out.println(response1.code());
             System.out.println(response1.body().string());
@@ -103,7 +103,7 @@ public class NetworkTests {
         Activity activity = mock(Activity.class);
         NetworkManager networkManager = new NetworkManager(activity.getApplicationContext());
 
-        Response response1 = networkManager.Login(account);
+        Response response1 = networkManager.login(account);
         Credentials credentials;
 
         Response response = networkManager.getTripSummary(1067);

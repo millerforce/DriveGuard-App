@@ -76,7 +76,7 @@ public class LoginScreen extends AppCompatActivity {
                 Response response;
 
                 try {
-                    response = networkManager.Login(account);
+                    response = networkManager.login(account);
 
                 } catch (Exception e){
 

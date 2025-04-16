@@ -77,7 +77,7 @@ public class SignUpScreen extends AppCompatActivity {
                 Response response;
                 try {
 
-                    response = networkManager.SignUp(account);
+                    response = networkManager.signUp(account);
 
                 } catch (Exception e) {
                     Toast.makeText(SignUpScreen.this, "An error occurred", Toast.LENGTH_LONG).show();
@@ -92,7 +92,7 @@ public class SignUpScreen extends AppCompatActivity {
                     Response loginResponse;
 
                     try {
-                        loginResponse = networkManager.Login(account);
+                        loginResponse = networkManager.login(account);
                     } catch (RuntimeException e) {
                         throw new RuntimeException(e);
                     }

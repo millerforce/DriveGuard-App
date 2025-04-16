@@ -41,8 +41,6 @@ public class ProfileScreen extends AppCompatActivity {
     private Button loginButton;
     private Button logoutButton;
     private Button signupButton;
-    private Button changeUsernameButton;
-    private Button changePasswordButton;
     private NetworkManager networkManager;
     private Credentials credentials;
 
@@ -68,8 +66,8 @@ public class ProfileScreen extends AppCompatActivity {
         signupButton = findViewById(R.id.signupButton);
         Button deleteButton = findViewById(R.id.main_delete_button);
 
-        changeUsernameButton = findViewById(R.id.changeUsernameButton);
-        changePasswordButton = findViewById(R.id.changePasswordButton);
+        Button changeUsernameButton = findViewById(R.id.changeUsernameButton);
+        Button changePasswordButton = findViewById(R.id.changePasswordButton);
 
         if (Utilities.checkConnection(this)) {
             Response driverResponse = networkManager.getDriver();
@@ -104,15 +102,14 @@ public class ProfileScreen extends AppCompatActivity {
         loginButton.setOnClickListener(v -> navigateToLogin());
         logoutButton.setOnClickListener(v -> performLogout(driver));
         signupButton.setOnClickListener(v -> navigateToSignUp());
-
-
-
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_menu,menu);
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item){
         int id = item.getItemId();
@@ -173,7 +170,7 @@ public class ProfileScreen extends AppCompatActivity {
 
             }
 
-            Response response = networkManager.UpdateUsername(newUsername);
+            Response response = networkManager.updateUsername(newUsername);
 
             if(response.isSuccessful()) {
                 Toast.makeText(this, "Username updated successfully", Toast.LENGTH_SHORT).show();
@@ -212,7 +209,7 @@ public class ProfileScreen extends AppCompatActivity {
 
             }
 
-            Response response = networkManager.UpdatePassword(oldPassword, newPassword);
+            Response response = networkManager.updatePassword(oldPassword, newPassword);
 
             if(response.isSuccessful()) {
 
@@ -220,15 +217,11 @@ public class ProfileScreen extends AppCompatActivity {
                 dialog.dismiss();
 
             } else {
-
                 Toast.makeText(this, "Failed to update password", Toast.LENGTH_SHORT).show();
-
             }
-
         });
 
         dialog.show();
-
     }
     private void showDeleteAccountDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -266,7 +259,7 @@ public class ProfileScreen extends AppCompatActivity {
                 if (TextUtils.isEmpty(password)){
                     Toast.makeText(ProfileScreen.this, "Please Enter Your Password", Toast.LENGTH_SHORT).show();
                 }else{
-                    Response response = networkManager.DeleteAccount(password);
+                    Response response = networkManager.deleteAccount(password);
 
                     if (response != null && response.isSuccessful()){
                         Toast.makeText(ProfileScreen.this, "Account Successfully Deleted", Toast.LENGTH_SHORT).show();
@@ -307,10 +300,9 @@ public class ProfileScreen extends AppCompatActivity {
 
             Toast.makeText(this, "No active session to logout from.", Toast.LENGTH_SHORT).show();
             return;
-
         }
 
-        Response response = networkManager.Logout();
+        Response response = networkManager.logout();
 
         if(response.isSuccessful()) {
 

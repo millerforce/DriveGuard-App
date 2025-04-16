@@ -35,7 +35,7 @@ public class NetworkManager {
     /*
     Note: every method in this class simply returns the servers response.
     The response code and body can be handled in the receiving activity(GsonUtilities for the body) or
-    we can a handler for them if we have time.
+    we can use a handler for them if we have time.
      */
 
     private final OkHttpClient client;
@@ -54,11 +54,10 @@ public class NetworkManager {
 
     /**
      * Method that starts a new trip with the server
-     * @param credentials for the drivers id and token
      * @param location takes android location which is formatted for the server in ServerLocation
      * @return if successful body contains a partial Trip object to be parsed
      */
-    public Response StartTrip(@NonNull Location location) {
+    public Response startTrip(@NonNull Location location) {
         Credentials credentials = Utilities.LoadCredentials(context);
         if (credentials.getDriverId() == -1){
             return null;
@@ -91,11 +90,10 @@ public class NetworkManager {
     }
     /**
      * Method that ends an existing trip with the server
-    * @param credentials for the drivers id, token, and trip id
      * @param location location takes android location which is formatted for the server in ServerLocation
      * @return if successful will return the full Trip object to be parsed
      */
-    public Response EndTrip(@NonNull Location location){
+    public Response endTrip(@NonNull Location location){
         Credentials credentials = Utilities.LoadCredentials(context);
 
         String jsonBody = LocationToServerLocationJson(location);
@@ -126,7 +124,6 @@ public class NetworkManager {
     /**
      * Method that adds an event to the server
      * @param event an event that needs to follow the servers schema
-     * @param credentials for the drivers drivers id, token, and trip id
      * @return if successful body is empty but code will be successful
      */
     public Response addEventToTrip(@NonNull DrivingEvent event){
@@ -161,7 +158,6 @@ public class NetworkManager {
 
     /**
      * retrieves the drivers current trip. fails if they are not on a trip
-     * @param credentials for the drivers drivers id, token, and trip id
      * @return if successful returns the current trip in the Trip class schema
      */
     public Response getCurrentTrip(){
@@ -194,7 +190,6 @@ public class NetworkManager {
 
     /**
      * retrieves a particular trips summary
-     * @param credentials for the drivers drivers id, token, and trip id
      * @param tripId the id for the trip in question
      * @return if successful will contain a full Trip object to be parsed
      */
@@ -226,7 +221,6 @@ public class NetworkManager {
 
     /**
      * retrieves a drivers list of previous trips
-     * @param credentials for the drivers id, and token
      * @return if successful the body will contain a list of CompletedTrip objects to be parsed
      */
     public Response getListOfTrips(){
@@ -254,7 +248,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response ClearTripHistory(){
+    public Response clearTripHistory(){
         Credentials credentials = Utilities.LoadCredentials(context);
 
         HttpUrl url = new HttpUrl.Builder()
@@ -279,7 +273,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response SignUp(@NonNull Account account){
+    public Response signUp(@NonNull Account account){
         Gson gson = new Gson();
         String jsonBody = gson.toJson(account);
 
@@ -310,7 +304,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response Login(@NonNull Account account) {
+    public Response login(@NonNull Account account) {
 
         HttpUrl url = new HttpUrl.Builder()
                 .scheme(scheme)
@@ -335,7 +329,8 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response Logout(){
+
+    public Response logout(){
         Credentials credentials = Utilities.LoadCredentials(context);
         if (credentials.getDriverId() == -1){
             return null;
@@ -365,7 +360,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response UpdatePassword(@NonNull String oldPassword, @NonNull String newPassword){
+    public Response updatePassword(@NonNull String oldPassword, @NonNull String newPassword){
         Credentials credentials = Utilities.LoadCredentials(context);
 
         HttpUrl url = new HttpUrl.Builder()
@@ -393,7 +388,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response RecoverAccount(@NonNull Account account){
+    public Response recoverAccount(@NonNull Account account){
 
         HttpUrl url = new HttpUrl.Builder()
                 .scheme(scheme)
@@ -418,7 +413,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response UpdateUsername(@NonNull String username){
+    public Response updateUsername(@NonNull String username){
 
         Credentials credentials = Utilities.LoadCredentials(context);
 
@@ -446,7 +441,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response UpdateName(@NonNull String firstName,@NonNull String lastName){
+    public Response updateName(@NonNull String firstName, @NonNull String lastName){
 
         Credentials credentials = Utilities.LoadCredentials(context);
 
@@ -503,7 +498,7 @@ public class NetworkManager {
             throw new RuntimeException(e);
         }
     }
-    public Response DeleteAccount(@NonNull String password){
+    public Response deleteAccount(@NonNull String password){
 
         Credentials credentials = Utilities.LoadCredentials(context);
 

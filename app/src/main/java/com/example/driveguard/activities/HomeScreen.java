@@ -42,6 +42,7 @@ import com.example.driveguard.objects.Driver;
 import com.example.driveguard.objects.Weather;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import lombok.SneakyThrows;
@@ -136,7 +137,7 @@ public class HomeScreen extends AppCompatActivity {
         }
         return true;
     }
-    @SneakyThrows
+
     public void LoadWeatherIcon(@NonNull NetworkManager networkManager) {
         weatherIcon = findViewById(R.id.weather);
         if (Utilities.checkConnection(this)) {
@@ -147,7 +148,11 @@ public class HomeScreen extends AppCompatActivity {
             Response weatherRes = networkManager.getWeatherFromLocation(dataCollector.getStartingLocation());
             if (weatherRes != null && weatherRes.isSuccessful()) {
                 assert weatherRes.body() != null;
-                weather = JsonToWeather(weatherRes.body().string());
+                try {
+                    weather = JsonToWeather(weatherRes.body().string());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 Picasso.get()
                         .load(weather.getIconUrl())
                         .placeholder(R.drawable.icon_sun)
